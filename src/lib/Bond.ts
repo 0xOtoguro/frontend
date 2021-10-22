@@ -1,10 +1,10 @@
 import { StaticJsonRpcProvider, JsonRpcSigner } from "@ethersproject/providers";
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 
 import { abi as ierc20Abi } from "src/abi/IERC20.json";
 import { getBondCalculator } from "src/helpers/BondCalculator";
 import { addresses } from "src/constants";
-import React, { ReactNode } from "react";
+import React from "react";
 
 export enum NetworkID {
   Mainnet = 1,

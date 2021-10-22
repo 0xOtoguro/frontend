@@ -6,9 +6,11 @@ import { abi as UniswapIERC20 } from "src/abi/UniswapIERC20.json";
 import { BigNumber, ethers } from "ethers";
 import { addresses } from "src/constants";
 import { getTokenPrice } from "../helpers";
+import { OlympusERC20Token } from "src/typechain";
 
 export const calcAludelDetes = async (networkID: NetworkID, provider: StaticJsonRpcProvider) => {
   const crucibleAddress = addresses[networkID].CRUCIBLE_OHM_LUSD;
+  // missing type on typechain
   const aludelContract = new ethers.Contract(crucibleAddress as string, OhmLusdCrucible, provider);
   const aludelData = await aludelContract.getAludelData();
   // getting contractAddresses & Pricing for calculations below
@@ -69,14 +71,18 @@ export const calcAludelDetes = async (networkID: NetworkID, provider: StaticJson
   let oldestDepositDate = Math.max.apply(null, pastDurations);
 
   // rewardToken is OHM for this Crucible
-  const rewardTokenContract = new ethers.Contract(aludelData.rewardToken as string, UniswapIERC20, provider);
+  const rewardTokenContract = new ethers.Contract(
+    aludelData.rewardToken as string,
+    UniswapIERC20,
+    provider,
+  ) as OlympusERC20Token;
 
   let rewardTokenDecimals = await rewardTokenContract.decimals();
   // let rewardTokenDecimals = 9;
 
   let rewardPoolBalance = await rewardTokenContract.balanceOf(aludelData.rewardPool);
   // balance of rewardToken in pool
-  let rewardTokenQuantity = rewardPoolBalance / 10 ** rewardTokenDecimals;
+  let rewardTokenQuantity = rewardPoolBalance.toNumber() / 10 ** rewardTokenDecimals;
 
   // amount of bonus tokens in program
   const bonusTokensLength = (await aludelContract.getBonusTokenSetLength()) as BigNumber;
@@ -122,7 +128,7 @@ export const calcAludelDetes = async (networkID: NetworkID, provider: StaticJson
 
   let lusdContract = new ethers.Contract(lusdContractAddress, UniswapIERC20, provider);
 
-  let stakedOhm = (await rewardTokenContract.balanceOf(aludelData.stakingToken)) / 10 ** rewardTokenDecimals;
+  let stakedOhm = (await rewardTokenContract.balanceOf(aludelData.stakingToken)).toNumber() / 10 ** rewardTokenDecimals;
   // 18 decimals for LUSD
   let stakedLusd = (await lusdContract.balanceOf(aludelData.stakingToken)) / 10 ** 18;
 
